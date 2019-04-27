@@ -1,13 +1,47 @@
 <!DOCTYPE html>
 <html>
+    <head>
+            <script>
+                    function intro() {
+                        responsiveVoice.speak("Let’s start with an example of a description of travel actions for going to the airport can be. Different routes are: going by bus, going by bus and train, taking a taxi. Activities, where assistance might be helpful for the route by bus, could be: finding the bus stop, getting on the bus, crossing the street, and walking from the bus to the entrance.");
+                    }
+                
+                    function waysOfQuestion(){
+                        let select = document.querySelector("#wayOfSelect");
+                        let option = select.options[select.selectedIndex].value;
+                        let text = `Let’s talk about your traveling to ${option}, either alone or with someone else. What are the different routes you can take to get to the ${option}?`;
+                        console.log(text);
+                    }
+                </script>
+    </head>
+
 <body>
-<h1>Hello World</h1>
-<button onclick="intro()">Introduction</button>
+    <h1>Wizard</h1>
+    <div>
+        <h2>Introduction</h2>
+        <button onclick="intro()">Introduction</button>
+    </div>
+
+
+    <h2>Ways-of</h2>
+    <div>
+        <button onclick="waysOfQuestion()">Question</button>
+        <select id="wayOfSelect">
+            <option value="restaurant">Restaurant</option>
+            <option value="doctor">Doctor</option>
+            <option value="nearest public transport station">Nearest public transport station.</option>
+        </select>
+    </div>
+    <div>
+        <button onclick="waysOfParaphrase()">Paraphrase</button>
+        <select>
+            <option>Restaurant</option>
+            <option>Doctor</option>
+            <option>Nearest public transport station.</option>
+        </select>
+    </div>
 </body>
 <script src="//code.responsivevoice.org/responsivevoice.js?key=CNTygof8"></script>
-<script>
-    function intro() {
-        responsiveVoice.speak("Let’s start with an example of a description of travel actions for going to the airport can be. Different routes are: going by bus, going by bus and train, taking a taxi. Activities, where assistance might be helpful for the route by bus, could be: finding the bus stop, getting on the bus, crossing the street, and walking from the bus to the entrance.");
-    }
-</script>
+
+
 </html>
