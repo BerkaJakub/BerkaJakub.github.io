@@ -13,6 +13,14 @@
                         console.log(text);
                         responsiveVoice.speak(text);
                     }
+
+                    function waysOfParaphrase(){
+                        let select = document.querySelector("#wayOfParaphraseSelect");
+                        let option = select.options[select.selectedIndex].value;
+                        let text = `Way of getting there can be by tram, bus, or some other transport, but it can be also more specific, for instance by tram number 9, walking across some bridge, through some area/square. So, what are the different routes you can take to get to the ${option}?`;
+                        console.log(text);
+                        responsiveVoice.speak(text);
+                    }
                 </script>
     </head>
 
@@ -26,6 +34,7 @@
 
     <h2>Ways-of</h2>
     <div>
+        <p> Let’s talk about your traveling to (restaurant/doctor/nearest public transport station), either alone or with someone else. What are the different routes you can take to get to the (restaurant/doctor/nearest public transport station)</restaurant></p>
         <button onclick="waysOfQuestion()">Question</button>
         <select id="wayOfSelect">
             <option value="restaurant">Restaurant</option>
@@ -34,13 +43,16 @@
         </select>
     </div>
     <div>
+        <p>Way of getting there can be by tram, bus, or some other transport, but it can be also more specific, for instance by tram number 9, walking across some bridge, through some area/square.</p>
         <button onclick="waysOfParaphrase()">Paraphrase</button>
-        <select>
+        <select id="wayOfParaphraseSelect">
             <option>Restaurant</option>
             <option>Doctor</option>
             <option>Nearest public transport station.</option>
         </select>
     </div>
+
+    <h2>Ways-of Answering</h2>
 </body>
 <script src="//code.responsivevoice.org/responsivevoice.js?key=CNTygof8"></script>
 
