@@ -11,6 +11,7 @@
                         let option = select.options[select.selectedIndex].value;
                         let text = `Let’s talk about your traveling to ${option}, either alone or with someone else. What are the different routes you can take to get to the ${option}?`;
                         console.log(text);
+                        responsiveVoice.speak(text);
                     }
                 </script>
     </head>
