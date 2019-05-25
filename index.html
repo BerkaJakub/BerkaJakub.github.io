@@ -3,6 +3,29 @@
 
 <head>
     <script>
+        let valuesIntroQuestion = "Now I would like to ask you about your personal values when choosing different routes. Values are inherently positive things, things you find important in your life and they often underlie our choices. Choosing something can promote or demote some of these values. These are the values that can be promoted or demoted: comfort, health, independence, safety, socializing, time-management and wealth.";
+        let valuesPromotionQuestion = "What values comfort, health, independence, safety, socializing, time-management and wealth, would be positively supported when you choose ";
+        let valuesDemotionQuestion = "What values comfort, health, independence, safety, socializing, time-management and wealth, would be negatively supported when you choose ";
+        let valuesFallbackText = "This is not really the thing I understand as a value. Values are inherently positive things, choose from: comfort, health, independence, safety, socializing, time-management and wealth.";
+        let valuesList = ["comfort", "health", "independence", "safety", "socializing", "time-management", "wealth"];
+
+        let partsOfFirstTime = "Activities, where assistance might be helpful for the route by bus, could be e.g.: finding the bus stop, getting on the bus, crossing the street, and walking from the bus to the entrance. Now, what are the different (travel related) activities you do when you go by ";
+        let partsOfQuestion = "What are the different (travel related) activities you do when you go by ";
+        
+        let aih = {
+            restaurant: {
+                waysof: []
+
+            },
+            doctor: {
+                waysof: []
+            },
+            station: {
+                waysof: []
+            }
+        };
+        let restaurant = [];
+
         function intro() {
             responsiveVoice.speak("Let’s start with an example of a description of travel actions for going to the airport can be. Different routes are: going by bus, going by bus and train, taking a taxi. Activities, where assistance might be helpful for the route by bus, could be: finding the bus stop, getting on the bus, crossing the street, and walking from the bus to the entrance.");
         }
@@ -32,8 +55,255 @@
             box.value = '';
             return false; // stop submission
         }
+
+        function answerWayOfRestaurant() {
+            var input = document.getElementById("waysOfRestaurant");
+            var value = input.value;
+            //var split = value.split(",");
+            aih.restaurant.waysof.push({ "action": value, "demoted": [], "promoted": [], "partsof": [] });
+            input.value = "";
+            console.log(aih.restaurant.waysof);
+        }
+        function answerWayOfDoctor() {
+            var input = document.getElementById("waysOfDoctor");
+            var value = input.value;
+            //var split = value.split(",");
+            aih.doctor.waysof.push({ "action": value, "demoted": [], "promoted": [], "partsof": [] });
+            input.value = "";
+            console.log(aih.doctor.waysof);
+        }
+        function answerWayOfStation() {
+            var input = document.getElementById("waysOfStation");
+            var value = input.value;
+            //var split = value.split(",");
+            aih.station.waysof.push({ "action": value, "demoted": [], "promoted": [], "partsof": [] });
+            input.value = "";
+            console.log(aih.station.waysof);
+        }
+
+        function grounding(destination) {
+            console.log(destination);
+            let waysArray = aih[destination].waysof;
+            let waysText = "";
+            waysArray.forEach(way => {
+                waysText += way.action + ', ';
+            });
+            let text = `You said that way of getting to ${destination} are: ${waysText}. Is that correct?`;
+            console.log(text);
+            responsiveVoice.speak(text);
+        }
+
+        function groundingValues(destination, wayOf){
+            var promotedValues, demotedValues;
+            aih[destination].waysof.forEach(element => {
+                if (element.action === wayOf) {
+                    console.log(element);
+                    promotedValues = element.promoted.toString();
+                    demotedValues = element.demoted.toString();
+                }
+            });
+            let text = `You said that ${promotedValues} are positively supported and ${demotedValues} are negatively supported when you choose ${wayOf}, is that correct? `;
+            console.log(text);
+            responsiveVoice.speak(text);
+        }
+
+        function groundingParts(destination, wayOf){
+            var partsOf;
+            aih[destination].waysof.forEach(element => {
+                if (element.action === wayOf) {
+                    partsOf = element.promoted.toString();
+                }
+            });
+            let text = `Different activities when you go by ${wayOf} and assistance might be helpful are: ${partsOf}, is it correct? `;
+            console.log(text);
+            responsiveVoice.speak(text);
+        }
+
+        function tts(text){
+            console.log(text);
+            responsiveVoice.speak(text);
+        }
+
+        function deleteWaysOf(destination) {
+            aih[destination].waysof = [];
+        }
+
+        function generatePartsForm(destination, wayof) {
+            var form = document.createElement("form");
+            form.setAttribute("id", "wayof");
+            form.setAttribute("onsubmit", "return false");
+            var inputText = document.createElement("input");
+            inputText.setAttribute("type", "text");
+            //inputText.setAttribute("id", "partsOf"+wayof);
+            var inputSubmit = document.createElement("input");
+            inputSubmit.setAttribute("type", "submit");
+            inputSubmit.setAttribute("onclick", `addPartOf('${destination}','${wayof}')`);
+            var selector = "parts-"+destination+"-"+wayof;
+            selector = selector.replace(/\s/g, '');
+            inputText.setAttribute("id", selector);
+            form.appendChild(inputText);
+            form.appendChild(inputSubmit);           
+            return form;
+        }
+
+        function valuesFallback() {
+            console.log(valuesFallbackText);
+            responsiveVoice.speak(valuesFallbackText);
+        }
+
+        function createQuestionButton(buttonText, questionText){
+            var button = document.createElement("button");
+            button.setAttribute("onclick", `tts('${questionText}')`);
+            button.innerText = buttonText;
+            return button;
+        }
+
+        function generateValuePromoteQuestion(destination, wayName){
+            var question = valuesPromotionQuestion + `route ${wayName} to ${destination}?`;
+            return createQuestionButton("Promoted Question", question);
+        }
+
+        function generateValueDemoteQuestion(destination, wayName){
+            var question = valuesDemotionQuestion + `route ${wayName} to ${destination}?`;
+            return createQuestionButton("Demoted Question", question);
+        }
+
+        function generatePartsOfFirstTimeQuestion(destination, wayName){
+            var question = partsOfFirstTime + `${wayName} to ${destination} and where assistance could be helpful?`;
+            return createQuestionButton("PartsOf FirstTime Question", question);
+        }
+
+        function generatePartsOfQuestion(destination, wayName){
+            var question = partsOfQuestion + `${wayName} to ${destination} and where assistance could be helpful?`;
+            return createQuestionButton("PartsOf Question", question);
+        }
+
+        function generateWaysOf(destination) {
+            var destinationDiv = document.getElementById(destination);
+            var valuesParagraph =  document.createElement("p");
+            valuesParagraph.innerText = "Values";
+            var valuesIntroButton = createQuestionButton("Values Intro", valuesIntroQuestion);
+            let divider = document.createElement("div");
+            destinationDiv.appendChild(divider);
+            destinationDiv.appendChild(valuesParagraph);
+            destinationDiv.appendChild(valuesIntroButton);
+            aih[destination].waysof.forEach(wayof => {
+                var wayDiv = document.createElement("div");
+                var wayName = document.createElement("h4");
+                wayName.innerText = wayof.action;
+                wayDiv.appendChild(wayName);
+                var valuesPromotedQuestionButton = generateValuePromoteQuestion(destination, wayof.action);
+                wayDiv.appendChild(valuesPromotedQuestionButton);
+
+                valuesList.forEach(value => {
+                    var valueButton = document.createElement("button");
+                    valueButton.setAttribute("onclick", `addPromotedValue('${destination}', '${wayof.action}',  '${value}')`);
+                    valueButton.setAttribute("class", "promoted-btn");
+                    valueButton.innerText = value;
+                    wayDiv.appendChild(valueButton);
+                });
+                let divider = document.createElement("div");
+                wayDiv.appendChild(divider);
+                var valuesDemotedQuestionButton = generateValueDemoteQuestion(destination, wayof.action);
+                wayDiv.appendChild(valuesDemotedQuestionButton);
+
+                valuesList.forEach(value => {
+                    var valueButton = document.createElement("button");
+                    valueButton.setAttribute("onclick", `addDemotedValue('${destination}', '${wayof.action}',  '${value}')`);
+                    valueButton.setAttribute("class", "demoted-btn");
+                    valueButton.innerText = value;
+                    wayDiv.appendChild(valueButton);
+                });
+                wayDiv.appendChild(divider);
+                
+                let valuesFallbackButton = document.createElement("button");
+                valuesFallbackButton.setAttribute("onclick", `valuesFallback()`);
+                valuesFallbackButton.innerText = "Values Fallback";
+                wayDiv.appendChild(valuesFallbackButton);
+
+                let groundingButton = document.createElement("button");
+                groundingButton.setAttribute("onclick", `groundingValues('${destination}', '${wayof.action}')`);
+                groundingButton.innerText = "Grounding values";
+                wayDiv.appendChild(groundingButton);
+                
+                let deleteValuesButton = document.createElement("button");
+                deleteValuesButton.setAttribute("onclick", `deleteValues('${destination}', '${wayof.action}')`);
+                deleteValuesButton.innerText = "Delete Values";
+                wayDiv.appendChild(deleteValuesButton);
+                
+                var form = generatePartsForm(destination, wayof.action);
+                var text = document.createElement("p");
+                text.innerText = "Parts of";
+
+                wayDiv.appendChild(divider);
+                
+                let groundingParts = document.createElement("button");
+                groundingParts.setAttribute("onclick", `groundingParts('${destination}', '${wayof.action}')`);
+                groundingParts.innerText = "Grounding parts of";
+                wayDiv.appendChild(text);
+                var partsOfFirstQuestion = generatePartsOfFirstTimeQuestion(destination, wayof.action);
+                wayDiv.appendChild(partsOfFirstQuestion);
+
+                var partsOfQuestion = generatePartsOfQuestion(destination, wayof.action);
+                wayDiv.appendChild(partsOfQuestion);
+                wayDiv.appendChild(form);
+                wayDiv.appendChild(groundingParts);
+                destinationDiv.appendChild(wayDiv);
+            });
+
+        }
+
+        function deleteValues(destination, wayof){
+            aih[destination].waysof.forEach(element => {
+                if (element.action == wayof) {
+                    element.promoted = [];
+                    element.demoted = [];
+                }
+            });
+        }
+
+        function addPromotedValue(destination, wayof, value) {
+            aih[destination].waysof.forEach(element => {
+                if (element.action == wayof) {
+                    element.promoted.push(value);
+                    console.log(element);
+                }
+            });
+        }
+        function addDemotedValue(destination, wayof, value) {
+            aih[destination].waysof.forEach(element => {
+                if (element.action == wayof) {
+                    element.demoted.push(value);
+                    console.log(element);
+                }
+            });
+        }
+
+        function addPartOf(destination, wayof){
+            var selector = "#parts-"+destination+"-"+wayof;
+            selector = selector.replace(/\s/g, '');
+            var input = document.querySelector(selector);
+            console.log(input);
+            var value = input.value;
+            console.log(value);
+            aih[destination].waysof.forEach(element => {
+                if (element.action == wayof) {
+                    element.partsof.push(value);
+                    console.log(element);
+                }
+            });
+        }      
     </script>
 </head>
+<style>
+    .promoted-btn {
+        background-color: aquamarine;
+    }
+
+    .demoted-btn {
+        background-color: deeppink;
+    }
+</style>
 
 <body>
     <h1>Wizard</h1>
@@ -69,23 +339,40 @@
     </div>
 
     <h2>Ways-of Answering</h2>
-    <form onsubmit="return addToArray()">
-        <p>Restaurant</p>
-        <input type="text" id="box">
-        <input type="submit" value="Submit">
-    </form>
+    <div id="restaurant">
+        <h3>Restaurant</h3>
+        <form id="form" onsubmit="return false;">
+            <input type="text" id="waysOfRestaurant" />
+            <input type="submit" onclick="answerWayOfRestaurant();" />
+        </form>
+        <button onclick="grounding('restaurant')">Grounding restaurant</button>
+        <button onclick="deleteWaysOf('restaurant')">Not correct</button>
+        <button onclick="generateWaysOf('restaurant')">Correct</button>
+    </div>
+    <div id="doctor">
+        <h3>Doctor</h3>
+        <form id="form" onsubmit="return false;">
+            <input type="text" id="waysOfDoctor" />
+            <input type="submit" onclick="answerWayOfDoctor();" />
+        </form>
+        <button onclick="grounding('doctor')">Grounding doctor</button>
+        <button onclick="deleteWaysOf('doctor')">Not correct</button>
+        <button onclick="generateWaysOf('doctor')">Correct</button>
+    </div>
+    <div id="station">
+        <h3>Station</h3>
+        <form id="form" onsubmit="return false;">
+            <input type="text" id="waysOfStation" />
+            <input type="submit" onclick="answerWayOfStation();" />
+        </form>
+        <button onclick="grounding('station')">Grounding station</button>
+        <button onclick="deleteWaysOf('station')">Not correct</button>
+        <button onclick="generateWaysOf('doctor')">Correct</button>
+    </div>
 
-    <form onsubmit="return addToArray()">
-        <p>Doctor</p>
-        <input type="text" id="box">
-        <input type="submit" value="Submit">
-    </form>
-    
-    <form onsubmit="return addToArray()">
-        <p>Nearest station</p>
-        <input type="text" id="box">
-        <input type="submit" value="Submit">
-    </form>
+
+
+
 </body>
 <script src="//code.responsivevoice.org/responsivevoice.js?key=CNTygof8"></script>
 
